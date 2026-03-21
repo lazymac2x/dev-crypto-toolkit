@@ -1,0 +1,262 @@
+openapi: 3.0.3
+info:
+  title: dev-crypto-toolkit
+  description: Developer cryptography utilities REST API
+  version: 1.0.0
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:4300
+    description: Local development
+
+paths:
+  /api/v1/jwt/decode:
+    post:
+      summary: Decode JWT token
+      description: Decode a JWT token without verification. Returns header, payload, and timing metadata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+      responses:
+        "200":
+          description: Decoded JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      header: { type: object }
+                      payload: { type: object }
+                      issuedAt: { type: string }
+                      expiresAt: { type: string }
+                      expired: { type: boolean }
+
+  /api/v1/hash:
+    post:
+      summary: Hash a string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+                algorithm: { type: string, enum: [md5, sha1, sha256, sha512], default: sha256 }
+                key: { type: string, description: "If provided, generates HMAC" }
+                hmacAlgorithm: { type: string, default: sha256 }
+      responses:
+        "200":
+          description: Hash result
+
+  /api/v1/base64/encode:
+    post:
+      summary: Base64 encode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+      responses:
+        "200":
+          description: Encoded string
+
+  /api/v1/base64/decode:
+    post:
+      summary: Base64 decode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+      responses:
+        "200":
+          description: Decoded string
+
+  /api/v1/url/encode:
+    post:
+      summary: URL encode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+      responses:
+        "200":
+          description: URL-encoded string
+
+  /api/v1/url/decode:
+    post:
+      summary: URL decode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+      responses:
+        "200":
+          description: URL-decoded string
+
+  /api/v1/uuid:
+    get:
+      summary: Generate UUID v4
+      parameters:
+        - name: count
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        "200":
+          description: Generated UUIDs
+
+  /api/v1/password:
+    get:
+      summary: Generate passwords
+      parameters:
+        - name: length
+          in: query
+          schema: { type: integer, default: 16 }
+        - name: count
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: lowercase
+          in: query
+          schema: { type: boolean, default: true }
+        - name: uppercase
+          in: query
+          schema: { type: boolean, default: true }
+        - name: digits
+          in: query
+          schema: { type: boolean, default: true }
+        - name: symbols
+          in: query
+          schema: { type: boolean, default: true }
+      responses:
+        "200":
+          description: Generated passwords
+
+  /api/v1/password/hash:
+    post:
+      summary: Hash a password (PBKDF2-SHA512)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string }
+                iterations: { type: integer, default: 100000 }
+      responses:
+        "200":
+          description: Password hash
+
+  /api/v1/password/verify:
+    post:
+      summary: Verify password against hash
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, hash]
+              properties:
+                password: { type: string }
+                hash: { type: string }
+      responses:
+        "200":
+          description: Verification result
+
+  /api/v1/random:
+    get:
+      summary: Generate random bytes
+      parameters:
+        - name: bytes
+          in: query
+          schema: { type: integer, default: 32 }
+        - name: format
+          in: query
+          schema: { type: string, enum: [hex, base64, array], default: hex }
+      responses:
+        "200":
+          description: Random bytes
+
+  /api/v1/timestamp:
+    post:
+      summary: Convert timestamp formats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [timestamp]
+              properties:
+                timestamp:
+                  description: Unix timestamp (seconds or ms), ISO string, or date string
+      responses:
+        "200":
+          description: Converted timestamp in all formats
+
+  /api/v1/encode/rot13:
+    post:
+      summary: ROT13 encode/decode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+      responses:
+        "200":
+          description: ROT13 result
+
+  /api/v1/encode/caesar:
+    post:
+      summary: Caesar cipher
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+                shift: { type: integer, default: 3 }
+      responses:
+        "200":
+          description: Caesar cipher result
